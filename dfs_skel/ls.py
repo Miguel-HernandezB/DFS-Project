@@ -7,14 +7,13 @@
 # 	List client for the DFS
 #
 
-
-
+import sys
 import socket
 
 from Packet import *
 
 def usage():
-	print """Usage: python %s <server>:<port, default=8000>""" % sys.argv[0] 
+	print ("""Usage: python %s <server>:<port, default=8000>""" % sys.argv[0])
 	sys.exit(0)
 
 def client(ip, port):
@@ -34,7 +33,7 @@ if __name__ == "__main__":
 		port = 8000
 	elif len(server == 2):
 		ip = server[0]
-		port = int server[1]
+		port = int(server[1])
 
 	if not ip:
 		usage()
