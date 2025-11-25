@@ -84,9 +84,9 @@ class mds_db:
 		except:
 			return 0
 	
- 	def GetFileInfo(self, fname):
+	def GetFileInfo(self, fname):
 		"""Given a filename, if the file is stored in DFS
-     		   return its filename id and fsize.  Internal use only.
+     		return its filename id and fsize.  Internal use only.
 		   Does not have to be accessed from the metadata server.
 		"""
 		query = """select fid, fsize from inode where fname="%s" """ % fname
@@ -101,7 +101,7 @@ class mds_db:
 		"""Returns the attributes of the files stored in the DFS"""
 		"""File Name and Size"""
 
-		query = """select fname, fsize from inode where 1""" ;
+		query = """select fname, fsize from inode where 1"""
 		self.c.execute(query)	
 		return self.c.fetchall()
 

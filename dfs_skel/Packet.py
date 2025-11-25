@@ -92,7 +92,7 @@ class Packet:
 
 	def getBlockID(self):
 		"""Returns a the block_id from a packet."""
-			return self.packet["blockid"]
+		return self.packet["blockid"]
 
 	def getFileInfo(self):
 		"""Returns the file info in a packet."""

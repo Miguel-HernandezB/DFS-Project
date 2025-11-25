@@ -12,21 +12,21 @@
 from mds_db import *
 from Packet import *
 import sys
-import SocketServer
+import socketserver
 
 def usage():
-	print """Usage: python %s <port, default=8000>""" % sys.argv[0] 
+	print ("""Usage: python %s <port, default=8000>""" % sys.argv[0])
 	sys.exit(0)
 
 
-class MetadataTCPHandler(SocketServer.BaseRequestHandler):
+class MetadataTCPHandler(socketserver.BaseRequestHandler):
 
 	def handle_reg(self, db, p):
 		"""Register a new client to the DFS  ACK if successfully REGISTERED
 			NAK if problem, DUP if the IP and port already registered
 		"""
 		try:
-			if # Fill condition:
+			if ():
 				self.request.sendall("ACK") 
 			else:
 				self.request.sendall("DUP")
@@ -125,12 +125,13 @@ if __name__ == "__main__":
     HOST, PORT = "", 8000
 
     if len(sys.argv) > 1:
-    	try:
-    		PORT = int(sys.argv[1])
-    	except:
-    		usage()
 
-    server = SocketServer.TCPServer((HOST, PORT), MetadataTCPHandler)
+		try:
+			PORT = int(sys.argv[1])
+		except:
+			usage()
+
+	server = socketserver.TCPServer((HOST, PORT), MetadataTCPHandler)
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
