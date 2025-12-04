@@ -90,11 +90,20 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 	def handle_blocks(self, db, p):
 		"""Add the data blocks to the file inode"""
 
-		# Fill code to get file name and blocks from
-		# packet
+		#Get file name and blocks from packet
+		file_name = p.getFileName()														#Get file name from packet
+		file_blocks = p.getDataBlocks													#Get blocks from packet
 	
 		# Fill code to add blocks to file inode
-
+		try:
+			if db.AddBlockToInode(file_name, file_blocks):								##If value returned 1 Succesful add
+				self.request.sendall("OK")
+			else:
+				self.request.sendall("NFILEFOUND_OR_NODE_NOT_FOUND")					##If value is none or 0										
+		except: 
+			self.request.sendall("ERROR_INSERTING_BLOCKS")								##If the .execute(querry) fails
+		
+		
 		
 	def handle(self):
 
@@ -107,7 +116,7 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 
 		# Receive a msg from the list, data-node, or copy clients
 		msg = self.request.recv(1024)
-		print msg, type(msg)
+		print(msg, type(msg))
 		
 		# Decode the packet received
 		p.DecodePacket(msg)
@@ -123,28 +132,26 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 
 		elif cmd == "list":
 			# Client asking for a list of files
-			# Fill code
+			self.handle_list(db)
 		
 		elif cmd == "put":
 			# Client asking for servers to put data
-			# Fill code
+			self.handle_put(db, p)
 		
 		elif cmd == "get":
 			# Client asking for servers to get data
-			# Fill code
+			self.handle_get(db, p)
 
 		elif cmd == "dblks":
 			# Client sending data blocks for file
-			 # Fill code
-
+			self.handle_blocks(db, p)
 
 		db.Close()
 
 if __name__ == "__main__":
-    HOST, PORT = "", 8000
+	HOST, PORT = "", 8000
 
-    if len(sys.argv) > 1:
-
+	if len(sys.argv) > 1:
 		try:
 			PORT = int(sys.argv[1])
 		except:
@@ -154,4 +161,4 @@ if __name__ == "__main__":
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
-    server.serve_forever()
+	server.serve_forever()
