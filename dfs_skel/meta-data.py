@@ -58,11 +58,16 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 		"""Insert new file into the database and send data nodes to save
 		   the file.
 		"""
+		##Getting the file size and name from the packet
+		file_name, file_size = p.getFileInfo()
 	
 	
-		if db.InsertFile(info[0], info[1]):
-			# Fill code
+		if db.InsertFile(file_name, file_size):											##InsertFile returns 1 if file was successfully inserted, otherwise 0
+			available_nodes = db.GetDataNodes()											##Search for the available data nodes in database, GetDataNode() returns a list of tuples (addr, port)
 			
+			p.BuildPutResponse(available_nodes)											##Build Packet with the available nodes
+			self.request.sendall(p.getEncodePacket())									##Send encoded packet
+
 		else:
 			self.request.sendall("DUP")
 	
@@ -71,13 +76,14 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 			server nodes that contain the file.
 		"""
 
-		# Fill code to get the file name from packet and then 
-		# get the fsize and array of metadata server
+		file_name = p.getFileName()														##Getting desired file name from packet
+		
+		fsize, file_blocks = db.GetFileInode(file_name)									##Search file name in the database using .GetFileInfo() (returns tuple of fsize and , otherwise returns none)
 
-		if fsize:
-			# Fill code
+		if fsize:																		##fsize == none file not found
+			p.BuildGetResponse(file_blocks, fsize)										##Make packet with the list of the file's data block's location
+			self.request.sendall(p.getEncodedPacket())									##Send encoded packet
 
-			self.request.sendall(p.getEncodedPacket())
 		else:
 			self.request.sendall("NFOUND")
 
