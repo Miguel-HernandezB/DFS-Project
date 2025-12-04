@@ -26,7 +26,13 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 			NAK if problem, DUP if the IP and port already registered
 		"""
 		try:
-			if ():
+			
+			#Retriving address and port 
+			address = p.getAddr()
+			port = p.getPort()
+
+			## Using AddDataNode() returns row ID on success, if duplicate then zero 
+			if db.AddDataNode(address, port):
 				self.request.sendall("ACK") 
 			else:
 				self.request.sendall("DUP")
@@ -36,7 +42,15 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 	def handle_list(self, db):
 		"""Get the file list from the database and send list to client"""
 		try:
-			# Fill code here
+			
+			file_list = db.GetFiles()													##We get files from data base	
+
+			response_list_packet = Packet.BuildListResponse(file_list)					##File list is transformed into a packet
+
+			encoded_response_packet = response_list_packet.GetEncodedPacket()			##The packet is then encoded into a json format to be sent to the network
+
+			self.request.sendall(encoded_response_packet)								##Send encoded packet list
+
 		except:
 			self.request.sendall("NAK")	
 
@@ -44,8 +58,7 @@ class MetadataTCPHandler(socketserver.BaseRequestHandler):
 		"""Insert new file into the database and send data nodes to save
 		   the file.
 		"""
-	       
-		# Fill code 
+	
 	
 		if db.InsertFile(info[0], info[1]):
 			# Fill code
