@@ -26,8 +26,8 @@ def register(meta_ip, meta_port, data_ip, data_port):
 	"""
 
 	# Establish connection
-	
-	# Fill code	
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((meta_ip, meta_port))
 
 	try:
 		response = "NAK"
@@ -40,14 +40,14 @@ def register(meta_ip, meta_port, data_ip, data_port):
 			if response == "DUP":
 				print("Duplicate Registration")
 
-		 	if response == "NAK":
+			if response == "NAK":
 				print("Registratation ERROR")
 
 	finally:
 		sock.close()
 	
 
-class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
+class DataNodeTCPHandler(socketserver.BaseRequestHandler):
 
 	def handle_put(self, p):
 
@@ -57,7 +57,6 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 		"""
 
 		fname, fsize = p.getFileInfo()
-
 		self.request.send("OK")
 
 		# Generates an unique block id.
@@ -67,8 +66,18 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 		# Open the file for the new data block.  
 		# Receive the data block.
 		# Send the block id back
+		file_path = os.path.join(DATA_PATH, blockid)					##creates a file path with the blockid as the File's name
 
-		# Fill code
+		data = self.request.recv(fsize)									##Receive the data block.
+		decoded_data = data.decode("utf-8")								##Decode into string
+
+		try:
+			with open(file_path, 'wb') as f:							##Open the file for the new data block.
+				f.write(decoded_data)									##Write the data recieved 
+			
+			self.request.send(blockid)									##Send the block id back (type string)
+		except:
+			print("Error while writing block to node")		
 
 	def handle_get(self, p):
 		
@@ -79,7 +88,17 @@ class DataNodeTCPHandler(SocketServer.BaseRequestHandler):
 		# Read the file with the block id data
 		# Send it back to the copy client.
 		
-		# Fill code
+		file_path = os.path.join(DATA_PATH, blockid)
+
+		if os.path.exists(file_path):
+			with open(file_path, 'rb') as f:
+				data = f.read()
+			self.request.sendall(data.encode("utf-8"))
+		
+		else:
+			print("Error: Block not found")
+
+
 
 	def handle(self):
 		msg = self.request.recv(1024)
@@ -118,8 +137,8 @@ if __name__ == "__main__":
 
 
 	register("localhost", META_PORT, HOST, PORT)
-	server = SocketServer.TCPServer((HOST, PORT), DataNodeTCPHandler)
+	server = socketserver.TCPServer((HOST, PORT), DataNodeTCPHandler)
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
- 	server.serve_forever()
+	server.serve_forever()
